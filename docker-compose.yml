@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=postgresql://pweb:pweb@db2:5432/fast_api_tasker
+      - DATABASE_URL=postgresql://pweb:pweb@db:5432/fast_api_tasker
     depends_on:
       - db
     networks:
