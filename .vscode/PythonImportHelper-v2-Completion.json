@@ -49,34 +49,34 @@
     },
     {
         "label": "engine",
-        "importPath": "database",
-        "description": "database",
+        "importPath": "app.database",
+        "description": "app.database",
         "isExtraImport": true,
-        "detail": "database",
+        "detail": "app.database",
         "documentation": {}
     },
     {
         "label": "Base",
-        "importPath": "database",
-        "description": "database",
+        "importPath": "app.database",
+        "description": "app.database",
         "isExtraImport": true,
-        "detail": "database",
+        "detail": "app.database",
         "documentation": {}
     },
     {
         "label": "AsyncSessionLocal",
-        "importPath": "database",
-        "description": "database",
+        "importPath": "app.database",
+        "description": "app.database",
         "isExtraImport": true,
-        "detail": "database",
+        "detail": "app.database",
         "documentation": {}
     },
     {
         "label": "Base",
-        "importPath": "database",
-        "description": "database",
+        "importPath": "app.database",
+        "description": "app.database",
         "isExtraImport": true,
-        "detail": "database",
+        "detail": "app.database",
         "documentation": {}
     },
     {
@@ -136,11 +136,19 @@
         "documentation": {}
     },
     {
+        "label": "CryptContext",
+        "importPath": "passlib.context",
+        "description": "passlib.context",
+        "isExtraImport": true,
+        "detail": "passlib.context",
+        "documentation": {}
+    },
+    {
         "label": "DATABASE_URL",
         "kind": 5,
         "importPath": "app.database",
         "description": "app.database",
-        "peekOfCode": "DATABASE_URL = \"postgresql+asyncpg://pweb:pweb@db2:5432/fast_api_tasker\"\nengine = create_async_engine(DATABASE_URL, echo=True)\nAsyncSessionLocal = sessionmaker(\n    bind=engine,\n    class_=AsyncSession,\n    expire_on_commit=False,\n)\nBase = declarative_base()\nasync def get_db():\n    async with AsyncSessionLocal() as session:",
+        "peekOfCode": "DATABASE_URL = \"postgresql+asyncpg://pweb:pweb@db:5432/fast_api_tasker\"\nengine = create_async_engine(DATABASE_URL, echo=True)\nAsyncSessionLocal = sessionmaker(\n    bind=engine,\n    class_=AsyncSession,\n    expire_on_commit=False,\n)\nBase = declarative_base()\nasync def get_db():\n    async with AsyncSessionLocal() as session:",
         "detail": "app.database",
         "documentation": {}
     },
@@ -185,7 +193,7 @@
         "kind": 6,
         "importPath": "app.modes",
         "description": "app.modes",
-        "peekOfCode": "class User(Base):\n    __tablename__ = 'users'\n    id = Column(Integer, primary_key=True, index=True)\n    name = Column(String, index=True)\n    email = Column(String, nullable=True, index=True)\n    password = Column(String, index=True)\n    date_of_born = Column(Date, nullable=True, index=True)\n    tasks = relationship('Task', back_populates='executor_user')\nclass Task(Base):\n    __tablename__='tasks'",
+        "peekOfCode": "class User(Base):\n    __tablename__ = 'users'\n    id = Column(Integer, primary_key=True, index=True)\n    name = Column(String, index=True)\n    email = Column(String, nullable=True, index=True)\n    password = Column(String, index=True)\n    date_of_born = Column(Date, nullable=True, index=True)\n    tasks = relationship('Task', back_populates='executor_user')\n    def verify_password(self, password: str) -> bool:\n        return pwd_context.verify(password, self.password_hash)",
         "detail": "app.modes",
         "documentation": {}
     },
@@ -195,6 +203,15 @@
         "importPath": "app.modes",
         "description": "app.modes",
         "peekOfCode": "class Task(Base):\n    __tablename__='tasks'\n    id = Column(Integer, primary_key=True, index=True)\n    name = Column(String, index=True)\n    status = Column(String, index=True)\n    executor_id = Column(Integer, ForeignKey('users.id'))\n    executor_user = relationship(\"User\", back_populates=\"tasks\")",
+        "detail": "app.modes",
+        "documentation": {}
+    },
+    {
+        "label": "pwd_context",
+        "kind": 5,
+        "importPath": "app.modes",
+        "description": "app.modes",
+        "peekOfCode": "pwd_context = CryptContext(schemes=[\"bcrypt\"], deprecated=\"auto\")\nclass User(Base):\n    __tablename__ = 'users'\n    id = Column(Integer, primary_key=True, index=True)\n    name = Column(String, index=True)\n    email = Column(String, nullable=True, index=True)\n    password = Column(String, index=True)\n    date_of_born = Column(Date, nullable=True, index=True)\n    tasks = relationship('Task', back_populates='executor_user')\n    def verify_password(self, password: str) -> bool:",
         "detail": "app.modes",
         "documentation": {}
     }
