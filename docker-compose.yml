@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  line_provider:
+  web:
     build:
       context: .
       dockerfile: Dockerfile
