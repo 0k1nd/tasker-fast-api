@@ -1,58 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import get_db
-from app.services.auth_service import AuthService
-from app.auth import verify_token
-from app.schemas import user
+from fastapi import APIRouter
+from fastapi_users import FastAPIUsers
+from app.user_manager import get_user_manager
+from app.auth import auth_backend
+from app.schemas.user_schemas import UserRead, UserCreate
 from app.models import User
-from sqlalchemy.future import select
+from app.oauth import github_oauth
 
 router = APIRouter()
 
-@router.post("/register", tags=["auth"])
-async def register(user_data: user.UserCreate, db: AsyncSession = Depends(get_db)):
-    user = await AuthService.register_user(user_data.name, user_data.email, user_data.password, db)
-    if not user:
-        raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
-    return {"message": "Пользователь зарегистрирован"}
+fastapi_users = FastAPIUsers[User, str](
+    get_user_manager,
+    [auth_backend],
+    UserRead,
+    UserCreate,
+)
 
-@router.post("/login", tags=["auth"])
-async def login(user_data: user.UserLogin, response: Response, db: AsyncSession = Depends(get_db)):
-    user = await AuthService.authenticate_user(user_data.email, user_data.password, db)
-    if not user:
-        raise HTTPException(status_code=400, detail="Неверный email или пароль")
+# JWT Аутентификация
+router.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"])
 
-    token = await AuthService.generate_token(user)
+# Регистрация (встроенная в FastAPI-Users)
+router.include_router(fastapi_users.get_register_router(), prefix="/auth", tags=["auth"])
 
-    response.set_cookie(
-        key="access_token",
-        value=f"Bearer {token}",
-        httponly=True,
-        samesite="Lax",
-        secure=True
-    )
-    return {"message": "Вход выполнен"}
+# Данные о пользователе
+router.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
 
-@router.get("/me", tags=["auth"])
-async def get_me(request: Request, db: AsyncSession = Depends(get_db)):
-    token = request.cookies.get("access_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Не авторизован")
-
-    token = token.replace("Bearer ", "")
-    payload = await verify_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Недействительный токен")
-
-    async with db.begin():
-        result = await db.execute(select(User).filter(User.email == payload["sub"]))
-        user = result.scalars().first()
-        if not user:
-            raise HTTPException(status_code=404, detail="Пользователь не найден")
-
-    return {"id": user.id, "name": user.name, "email": user.email}
-
-@router.post("/logout", tags=["auth"])
-async def logout(response: Response):
-    response.delete_cookie("access_token")
-    return {"message": "Выход выполнен"}
+# GitHub OAuth
+router.include_router(github_oauth.get_oauth_router(auth_backend, fastapi_users.get_user_manager), prefix="/auth/github", tags=["auth"])

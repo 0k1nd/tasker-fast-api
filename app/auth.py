@@ -1,25 +1,15 @@
+from fastapi_users.authentication import JWTStrategy, AuthenticationBackend, CookieTransport
 import os
-from datetime import datetime, timedelta
-from typing import Optional
-from jose import jwt, JWTError
-from dotenv import load_dotenv
 
-load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 500
+cookie_transport = CookieTransport(cookie_name="access_token", cookie_max_age=3600)
 
+def get_jwt_strategy() -> JWTStrategy:
+    return JWTStrategy(secret=SECRET_KEY, lifetime_seconds=3600)
 
-async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-async def verify_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except JWTError:
-        return None
+auth_backend = AuthenticationBackend(
+    name="jwt",
+    transport=cookie_transport,
+    get_strategy=get_jwt_strategy,
+)

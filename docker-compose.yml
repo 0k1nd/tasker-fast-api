@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=postgresql://pweb:pweb@db:5432/fast_api_tasker
+      - DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - db
     networks:
@@ -20,9 +20,9 @@ services:
     image: postgres
     container_name: db
     environment:
-      POSTGRES_USER: pweb
-      POSTGRES_PASSWORD: pweb
-      POSTGRES_DB: fast_api_tasker
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     networks:

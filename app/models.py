@@ -1,28 +1,31 @@
-from sqlalchemy import Column, Integer, DECIMAL, String, Date, Null, ForeignKey
+from sqlalchemy import Column, Integer, DECIMAL, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
-from passlib.context import CryptContext
 from app.database import Base
-import bcrypt
+import uuid
+from fastapi_users.db import (
+    SQLAlchemyBaseOAuthAccountTableUUID,
+    SQLAlchemyBaseUserTableUUID,
+)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class User(Base):
-    __tablename__ = 'users'
+class User(SQLAlchemyBaseUserTableUUID, Base):
+    __tablename__ = "users"
     
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String, nullable=False, index=True)
     email = Column(String, index=True)
-    password = Column(String, index=True)
-    date_of_born = Column(Date, nullable=True, index=True)
+    date_of_born = Column(Date, nullable=True)
     
+    oauth_accounts = relationship("OAuthAccount", back_populates="user")
     tasks = relationship('Task', back_populates='executor_user')
-    
-    async def set_password(self, password: str):
-        self.password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-    async def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode(), self.password_hash.encode())
+    
+class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
+    __tablename__ = "oauth_accounts"
+    
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    user = relationship("User", back_populates="oauth_accounts")
     
     
 class Task(Base):
