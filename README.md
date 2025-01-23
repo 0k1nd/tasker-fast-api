@@ -1,6 +1,19 @@
-# Docker + fast-api
+# Docker
+## Развёртка проекта в докере:
 
-## Запуск проекта:
+### Создать файл с окружением:
+
+```
+cp example.env .env
+```
+
+### Открыть и заполнить .env
+
+```
+nano .env
+```
+
+## Запуск проекта в докере:
 ```
 docker compose up --build
 ```
@@ -14,3 +27,6 @@ docker compose down
 ```
 docler compose down -v
 ```
+
+# Fast-API
+
