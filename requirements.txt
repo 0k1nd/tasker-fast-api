@@ -1,8 +1,8 @@
 pydantic[email]~=2.10.5
 SQLAlchemy~=2.0.37
-fastapi-users[sqlalchemy]
+fastapi[all]~=0.115.6
+fastapi-users[sqlalchemy,oauth,jwt]
 uvicorn~=0.34.0
-fastapi~=0.115.6
 psycopg2-binary
 requests
 httpx
