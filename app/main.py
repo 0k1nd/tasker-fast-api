@@ -1,5 +1,6 @@
+from .db import init_db
+
 from typing import Union
-from db import init_db
 from datetime import date
 import requests
 from fastapi import FastAPI, Query
