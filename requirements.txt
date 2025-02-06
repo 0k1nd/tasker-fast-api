@@ -14,4 +14,8 @@ passlib[bcrypt]
 auth
 sqlmodel
 sqlalchemy
+pyjwt
+passlib[bcrypt]
+aiosqlite
+fastapi_users_db_sqlmodel 
 
